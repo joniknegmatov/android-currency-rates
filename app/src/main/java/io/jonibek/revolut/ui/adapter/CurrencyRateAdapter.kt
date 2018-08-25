@@ -17,33 +17,14 @@ import java.util.*
 
 class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyViewHolder>(), CurrencyCallback, TextWatcher {
 
-
-
-    override fun afterTextChanged(p0: Editable?) {
-    }
-
-    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
-    override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        if (!text.isNullOrEmpty() && amount != text.toString().toFloat()) {
-            amount = text.toString().toFloat()
-            notifyDataSetChanged()
-        }
-    }
-
-
-    var currencyNameList = arrayListOf<String>()
-    lateinit var currentCurrency: String
-    var currencyContainer  : CurrencyContainer? = null
-    var amount: Float = 0f
+    private lateinit var currentCurrency: String
+    private var currencyContainer  : CurrencyContainer? = null
+    private var amount: Float = 0f
 
     fun setData(baseResult: BaseResult) {
         if (currencyContainer == null) {
             currencyContainer = CurrencyContainer(baseResult.base,baseResult.rates)
             currentCurrency = baseResult.base
-            currencyNameList.add(currentCurrency)
-            currencyNameList.addAll(baseResult.rates.keys.toList())
         } else {
             currencyContainer!!.updateValues(baseResult.rates)
         }
@@ -57,7 +38,7 @@ class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : 
     }
 
     override fun getItemCount(): Int {
-        return currencyNameList.size
+        return if(currencyContainer == null) 0 else currencyContainer!!.getCurrenciesAmount()
     }
 
     override fun onBindViewHolder(viewHolder: CurrencyViewHolder, position: Int) {
@@ -68,8 +49,9 @@ class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : 
             viewHolder.itemAmount.addTextChangedListener(this)
         } else {
             viewHolder.itemAmount.removeTextChangedListener(this)
-            val currencyName = currencyNameList[position]
-            val rate = currencyContainer!!.getRate(currencyNameList[position])!! * amount
+            val pair = currencyContainer!!.getCurrencyName(position)
+            val currencyName = pair.first
+            val rate = pair.second!! * amount
             viewHolder.itemName.text = currencyName
             viewHolder.itemAmount.setText(DecimalFormat("#.##").format(rate))
         }
@@ -88,11 +70,22 @@ class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : 
         if (currencyCode != currentCurrency) {
             currentCurrency = currencyCode
             amount = if(currencyAmount.isNullOrEmpty()) 1.0f else currencyAmount.toFloat()
-            val index = currencyNameList.indexOf(currencyCode)
-            currencyNameList.remove(currencyCode)
-            currencyNameList.add(0,currencyCode)
+            val index = currencyContainer!!.moveCurrencyToTop(currencyCode)
             notifyItemMoved(index, 0)
             currencyChangeCallback.onCurrencyChange(currentCurrency)
+        }
+    }
+
+    override fun afterTextChanged(p0: Editable?) {
+    }
+
+    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+    }
+
+    override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        if (!text.isNullOrEmpty() && amount != text.toString().toFloat()) {
+            amount = text.toString().toFloat()
+            notifyDataSetChanged()
         }
     }
 
