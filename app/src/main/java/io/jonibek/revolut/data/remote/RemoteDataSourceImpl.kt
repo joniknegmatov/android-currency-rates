@@ -11,11 +11,11 @@ class RemoteDataSourceImpl(var mHttpApi: HttpApi) : RemoteDataSource {
 
     private var currentCurrency: String = "EUR"
     private var remoteDataSourceCallback: RemoteDataSourceCallback? = null
-    private var subscribtion: Disposable? = null
+    private var subscription: Disposable? = null
 
     override fun unsubscribe() {
-        if (subscribtion != null)
-            subscribtion!!.dispose()
+        if (subscription != null)
+            subscription!!.dispose()
     }
 
 
@@ -32,9 +32,9 @@ class RemoteDataSourceImpl(var mHttpApi: HttpApi) : RemoteDataSource {
 
     override fun getRates(baseCurrency: String) {
         currentCurrency = baseCurrency
-        if (subscribtion != null)
-            subscribtion!!.dispose()
-        subscribtion = getObservable()
+        if (subscription != null)
+            subscription!!.dispose()
+        subscription = getObservable()
                 .subscribeOn(Schedulers.io())
                 .subscribe({ result ->
                     remoteDataSourceCallback!!.setRatesResult(result)

@@ -19,7 +19,7 @@ class MainActivity : BaseActivity(), RateListContract.RateListView, CurrencyChan
     @Inject
     lateinit var presenter : RateListContract.RatePresenter
 
-    lateinit var adapter: CurrencyRateAdapter
+    private lateinit var adapter: CurrencyRateAdapter
 
     override fun setupComponent(appComponent: AppComponent) {
         DaggerRateListComponent.builder()

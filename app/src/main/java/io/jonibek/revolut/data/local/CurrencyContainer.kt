@@ -17,10 +17,6 @@ class CurrencyContainer(base: String, ratesFromServer: Map<String, Float>) {
         rates.putAll(newRates)
     }
 
-    fun getRate(key : String) : Float? {
-       return rates[key]
-    }
-
     fun moveCurrencyToTop(currencyCode: String) : Int{
         val index = currencyNameList.indexOf(currencyCode)
         currencyNameList.remove(currencyCode)

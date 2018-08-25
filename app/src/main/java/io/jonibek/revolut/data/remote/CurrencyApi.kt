@@ -9,9 +9,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 class CurrencyApi {
 
     companion object {
-        const val BASE_URL = "https://revolut.duckdns.org/"
+        private const val BASE_URL = "https://revolut.duckdns.org/"
 
-        var retrofit : Retrofit ? = null
+        private var retrofit : Retrofit ? = null
 
         fun getClient() : Retrofit ? {
 

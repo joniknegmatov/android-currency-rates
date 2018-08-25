@@ -1,7 +1,6 @@
 package io.jonibek.revolut.ui.activity
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import io.jonibek.revolut.App
 import io.jonibek.revolut.di.component.AppComponent

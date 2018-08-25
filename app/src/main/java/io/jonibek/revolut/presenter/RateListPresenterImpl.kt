@@ -1,6 +1,5 @@
 package io.jonibek.revolut.presenter
 
-import android.os.Handler
 import io.jonibek.revolut.data.remote.RemoteDataSource
 import io.jonibek.revolut.data.remote.RemoteDataSourceCallback
 import io.jonibek.revolut.data.remote.json.BaseResult
@@ -11,13 +10,10 @@ class RateListPresenterImpl(var baseCurrency: String = "EUR",
                             var remoteDataSource: RemoteDataSource)
     : RateListContract.RatePresenter, RemoteDataSourceCallback {
 
-
-
     init {
         remoteDataSource.setCallback(this)
 
     }
-
 
     override fun setCurrency(baseRate: String) {
         baseCurrency = baseRate

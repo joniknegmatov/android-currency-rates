@@ -1,7 +1,6 @@
 package io.jonibek.revolut.data.remote
 
 import io.jonibek.revolut.data.remote.json.BaseResult
-import io.reactivex.Observable
 
 interface RemoteDataSource {
 

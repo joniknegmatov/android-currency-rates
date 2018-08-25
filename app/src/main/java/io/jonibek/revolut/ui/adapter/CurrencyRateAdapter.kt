@@ -13,9 +13,8 @@ import io.jonibek.revolut.data.local.CurrencyContainer
 import io.jonibek.revolut.data.remote.json.BaseResult
 import kotlinx.android.synthetic.main.list_item_currency.view.*
 import java.text.DecimalFormat
-import java.util.*
 
-class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyViewHolder>(), CurrencyCallback, TextWatcher {
+class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCallback) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyViewHolder>(), CurrencyCallback, TextWatcher {
 
     private lateinit var currentCurrency: String
     private var currencyContainer  : CurrencyContainer? = null
@@ -69,7 +68,7 @@ class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : 
     override fun changeCurrency(currencyCode: String, currencyAmount : String) {
         if (currencyCode != currentCurrency) {
             currentCurrency = currencyCode
-            amount = if(currencyAmount.isNullOrEmpty()) 1.0f else currencyAmount.toFloat()
+            amount = if(currencyAmount.isEmpty()) 1.0f else currencyAmount.toFloat()
             val index = currencyContainer!!.moveCurrencyToTop(currencyCode)
             notifyItemMoved(index, 0)
             currencyChangeCallback.onCurrencyChange(currentCurrency)
@@ -89,7 +88,7 @@ class CurrencyRateAdapter(var currencyChangeCallback: CurrencyChangeCallback) : 
         }
     }
 
-    inner class CurrencyViewHolder(itemView: View, var currencyCallback: CurrencyCallback) : RecyclerView.ViewHolder(itemView), View.OnFocusChangeListener {
+    inner class CurrencyViewHolder(itemView: View, private var currencyCallback: CurrencyCallback) : RecyclerView.ViewHolder(itemView), View.OnFocusChangeListener {
         override fun onFocusChange(p0: View?, hasFocus: Boolean) {
             if (hasFocus)
                 currencyCallback.changeCurrency(itemName.text.toString(), itemAmount.text.toString())
