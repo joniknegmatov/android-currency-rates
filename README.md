@@ -1,5 +1,5 @@
 # android-currency-rates
-App show real tame currency rates
+Apps show real time currency rates
 Project written on Kotlin
 
 Used Libraries : 
