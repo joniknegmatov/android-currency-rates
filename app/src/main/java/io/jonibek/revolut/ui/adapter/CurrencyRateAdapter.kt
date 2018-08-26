@@ -22,6 +22,7 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     private lateinit var currentCurrency: String
     private var currencyContainer: CurrencyContainer? = null
     private var amount: Float = 1f
+    private var hasConnection: Boolean = true
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -29,13 +30,22 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
 
     }
 
+    fun noNetworkConnection() {
+        hasConnection = false
+    }
+
     fun setData(baseResult: BaseResult) {
+        hasConnection = true
         if (currencyContainer == null) {
             currencyContainer = CurrencyContainer(baseResult.base, baseResult.rates)
             currentCurrency = baseResult.base
         } else {
             currencyContainer!!.updateValues(baseResult.rates)
             notifyItemRangeChanged(1, currencyContainer!!.getCurrenciesAmount() - 1)
+        }
+        if (toChangeValues != null) {
+            changeCurrency(toChangeValues!!.first, toChangeValues!!.second)
+            toChangeValues = null
         }
     }
 
@@ -77,16 +87,20 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     }
 
 
-    override fun changeCurrency(currencyCode: String, currencyAmount: String) {
-        if (currencyCode != currentCurrency) {
-            currentCurrency = currencyCode
-            amount = if (currencyAmount.isEmpty()) 1.0f else currencyAmount.toFloat()
-            val index = currencyContainer!!.moveCurrencyToTop(currencyCode)
-            notifyItemMoved(index, 0)
-            notifyItemChanged(index)
-            notifyItemChanged(0)
-            currencyChangeCallback.onCurrencyChange(currentCurrency)
-        }
+    var toChangeValues: Pair<CharSequence, CharSequence>? = null
+    override fun changeCurrency(currencyCode: CharSequence, currencyAmount: CharSequence) {
+        if (hasConnection) {
+            if (currencyCode != currentCurrency) {
+                currentCurrency = currencyCode.toString()
+                amount = if (currencyAmount.isEmpty()) 1.0f else currencyAmount.toString().toFloat()
+                val index = currencyContainer!!.moveCurrencyToTop(currencyCode.toString())
+                notifyItemMoved(index, 0)
+                notifyItemChanged(index)
+                notifyItemChanged(0)
+                currencyChangeCallback.onCurrencyChange(currentCurrency)
+            }
+        } else
+            toChangeValues = currencyCode to currencyAmount
     }
 
     override fun afterTextChanged(p0: Editable?) {
@@ -103,7 +117,7 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     inner class CurrencyViewHolder(itemView: View, private var currencyCallback: CurrencyCallback) : RecyclerView.ViewHolder(itemView), View.OnFocusChangeListener {
         override fun onFocusChange(p0: View?, hasFocus: Boolean) {
             if (hasFocus)
-                currencyCallback.changeCurrency(itemCode.text.toString(), itemAmount.text.toString())
+                currencyCallback.changeCurrency(itemCode.text, itemAmount.text)
         }
 
         val itemCode: TextView = itemView.textViewCurrencyCode
@@ -119,7 +133,7 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
 
 
 interface CurrencyCallback {
-    fun changeCurrency(currencyCode: String, currencyAmount: String)
+    fun changeCurrency(currencyCode: CharSequence, currencyAmount: CharSequence)
 }
 
 interface CurrencyChangeCallback {
