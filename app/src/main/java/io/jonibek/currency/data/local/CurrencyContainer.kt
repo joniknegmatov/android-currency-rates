@@ -7,8 +7,8 @@ class CurrencyContainer(base: String, ratesFromServer: Map<String, Float>) {
     private var currencyNameList = arrayListOf<String>()
 
     init {
-        rates.putAll(ratesFromServer)
         rates[base] = 0f
+        rates.putAll(ratesFromServer)
         currencyNameList.addAll(rates.keys)
     }
 
