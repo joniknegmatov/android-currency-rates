@@ -70,14 +70,14 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
             viewHolder.itemAmount.addTextChangedListener(this)
         } else {
             viewHolder.itemAmount.removeTextChangedListener(this)
-            val pair = currencyContainer!!.getCurrencyName(position)
+            val pair = currencyContainer!!.getCurrencyNameAndRate(position)
             val currencyName = pair.first
             val rate = pair.second!! * amount
             viewHolder.itemCode.text = currencyName
             viewHolder.itemAmount.setText(DecimalFormat("#.##").format(rate))
         }
 
-        val currencyInfo = CurrencyHelper.getCurrencyInfo(if (position == 0) currentCurrency else currencyContainer!!.getCurrencyName(position).first)
+        val currencyInfo = CurrencyHelper.getCurrencyInfo(if (position == 0) currentCurrency else currencyContainer!!.getCurrencyNameAndRate(position).first)
         viewHolder.itemName.text = currencyInfo.first
         viewHolder.itemSymbol.text = currencyInfo.second
     }

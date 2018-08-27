@@ -9,7 +9,6 @@ class CurrencyContainer(base: String, ratesFromServer: Map<String, Float>) {
     init {
         rates.putAll(ratesFromServer)
         rates[base] = 0f
-        currencyNameList.add(base)
         currencyNameList.addAll(rates.keys)
     }
 
@@ -24,7 +23,7 @@ class CurrencyContainer(base: String, ratesFromServer: Map<String, Float>) {
         return index
     }
 
-    fun getCurrencyName(index : Int) : Pair<String,Float?>{
+    fun getCurrencyNameAndRate(index : Int) : Pair<String,Float?>{
         return Pair( currencyNameList[index], rates[currencyNameList[index]])
     }
 
