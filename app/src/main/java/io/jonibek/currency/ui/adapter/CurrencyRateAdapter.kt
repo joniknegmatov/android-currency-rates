@@ -118,7 +118,7 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     }
 
     inner class CurrencyViewHolder(itemView: View, private var currencyCallback: CurrencyCallback) :
-            RecyclerView.ViewHolder(itemView), View.OnFocusChangeListener,View.OnClickListener {
+            RecyclerView.ViewHolder(itemView), View.OnFocusChangeListener {
 
         val itemCode: TextView = itemView.textViewCurrencyCode
         val itemAmount: EditText = itemView.editTextAmount
@@ -128,17 +128,11 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
 
         init {
             itemAmount.onFocusChangeListener = this
-            itemView.setOnClickListener(this)
         }
 
         override fun onFocusChange(p0: View?, hasFocus: Boolean) {
             if (hasFocus)
                 currencyCallback.changeCurrency(itemCode.text, itemAmount.text)
-        }
-
-
-        override fun onClick(p0: View?) {
-            currencyCallback.changeCurrency(itemCode.text, itemAmount.text)
         }
     }
 }
