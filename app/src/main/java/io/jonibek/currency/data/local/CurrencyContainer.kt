@@ -1,18 +1,20 @@
 package io.jonibek.currency.data.local
 
+import java.math.BigDecimal
 
-class CurrencyContainer(base: String, ratesFromServer: Map<String, Float>) {
 
-    private var rates = mutableMapOf<String,Float>()
+class CurrencyContainer(base: String, ratesFromServer: Map<String, BigDecimal>) {
+
+    private var rates = mutableMapOf<String, BigDecimal>()
     private var currencyNameList = arrayListOf<String>()
 
     init {
-        rates[base] = 0f
+        rates[base] = BigDecimal.ZERO
         rates.putAll(ratesFromServer)
         currencyNameList.addAll(rates.keys)
     }
 
-    fun updateValues(newRates : Map<String,Float>){
+    fun updateValues(newRates : Map<String,BigDecimal>){
         rates.putAll(newRates)
     }
 
@@ -23,7 +25,11 @@ class CurrencyContainer(base: String, ratesFromServer: Map<String, Float>) {
         return index
     }
 
-    fun getCurrencyNameAndRate(index : Int) : Pair<String,Float?>{
+    fun changeBaseRate(currencyName: String, rate : BigDecimal){
+        rates[currencyName] = rate
+    }
+
+    fun getCurrencyNameAndRate(index : Int) : Pair<String,BigDecimal?>{
         return Pair( currencyNameList[index], rates[currencyNameList[index]])
     }
 

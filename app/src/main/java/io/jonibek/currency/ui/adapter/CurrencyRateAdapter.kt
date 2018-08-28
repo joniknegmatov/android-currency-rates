@@ -15,13 +15,14 @@ import io.jonibek.currency.util.CurrencyHelper
 import java.text.DecimalFormat
 import android.support.v7.widget.SimpleItemAnimator
 import kotlinx.android.synthetic.main.list_item_currency.view.*
+import java.math.BigDecimal
 
 
 class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCallback) : RecyclerView.Adapter<CurrencyRateAdapter.CurrencyViewHolder>(), CurrencyCallback, TextWatcher {
 
     private lateinit var currentCurrency: String
     private var currencyContainer: CurrencyContainer? = null
-    private var amount: Float = 1f
+    private var amount: BigDecimal = BigDecimal.ONE
     private var hasConnection: Boolean = true
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -94,8 +95,10 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     override fun changeCurrency(currencyCode: CharSequence, currencyAmount: CharSequence) {
         if (hasConnection) {
             if (currencyCode != currentCurrency) {
+                val newAmount = if (currencyAmount.isEmpty()) BigDecimal.ONE else currencyAmount.toString().toBigDecimal()
+                currencyContainer!!.changeBaseRate(currentCurrency, amount/newAmount)
+                amount = newAmount
                 currentCurrency = currencyCode.toString()
-                amount = if (currencyAmount.isEmpty()) 1.0f else currencyAmount.toString().toFloat()
                 val index = currencyContainer!!.moveCurrencyToTop(currencyCode.toString())
                 notifyItemMoved(index, 0)
                 notifyItemChanged(index)
@@ -113,7 +116,7 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     }
 
     override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        amount = if (text!!.isEmpty()) 0f else text.toString().toFloat()
+        amount = if (text!!.isEmpty()) BigDecimal.ZERO else text.toString().toBigDecimal()
         notifyAllItemsChangedExpectFirst()
     }
 
