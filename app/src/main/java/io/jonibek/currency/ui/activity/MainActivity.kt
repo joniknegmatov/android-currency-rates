@@ -17,6 +17,7 @@ import io.jonibek.currency.ui.adapter.CurrencyRateAdapter
 import io.jonibek.currency.util.disableAnimation
 import io.jonibek.currency.util.prettyText
 import kotlinx.android.synthetic.main.activity_main.*
+import java.math.BigDecimal
 import java.util.*
 import javax.inject.Inject
 
@@ -70,12 +71,6 @@ class MainActivity : BaseActivity(), RateListContract.RateListView, CurrencyChan
         currencyList.adapter = adapter
     }
 
-    override fun setCurrencyRateList(baseResult: BaseResult) {
-        if (isAnyMessageOrIndicatorVisible()) hideAllMessagesAndIndicators()
-        textViewLastUpdate.text = String.format(getString(R.string.last_update), Date().prettyText())
-        adapter.setData(baseResult)
-    }
-
     private fun isAnyMessageOrIndicatorVisible(): Boolean {
         return snackbar.isShown || textViewLastUpdate.visibility == View.VISIBLE || progressBar.visibility == View.VISIBLE
     }
@@ -86,8 +81,8 @@ class MainActivity : BaseActivity(), RateListContract.RateListView, CurrencyChan
         progressBar.visibility = View.GONE
     }
 
-    override fun onCurrencyChange(currencyCode: String) {
-        presenter.setCurrency(currencyCode)
+    override fun onCurrencyChange(currencyCode: String, amount : String) {
+        presenter.setCurrency(currencyCode, amount)
     }
 
     override fun onError(message: String) {
@@ -96,6 +91,12 @@ class MainActivity : BaseActivity(), RateListContract.RateListView, CurrencyChan
 
     override fun noNetworkConnectionError() {
         showNoNetworkMessages()
+    }
+
+    override fun setResult(baseCurrency: String, currencies: Map<String, BigDecimal>) {
+        if (isAnyMessageOrIndicatorVisible()) hideAllMessagesAndIndicators()
+        textViewLastUpdate.text = String.format(getString(R.string.last_update), Date().prettyText())
+        adapter.setData(baseCurrency,currencies)
     }
 
     private fun showNoNetworkMessages() {
@@ -114,6 +115,10 @@ class MainActivity : BaseActivity(), RateListContract.RateListView, CurrencyChan
     override fun onPause() {
         super.onPause()
         presenter.onPause()
+    }
+
+    override fun onAmountChange(amount: String) {
+        presenter.changeAmount(amount)
     }
 }
 

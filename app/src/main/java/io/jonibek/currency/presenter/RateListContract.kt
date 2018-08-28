@@ -1,20 +1,23 @@
 package io.jonibek.currency.presenter
 
-import io.jonibek.currency.data.remote.json.BaseResult
+import java.math.BigDecimal
 
 class RateListContract {
 
     interface RatePresenter {
 
-        fun setCurrency(baseRate: String)
+        fun setCurrency(baseRate: String, inputAmount : String)
 
         fun getCurrencyRates()
+
+        fun changeAmount(inputAmount: String)
 
         fun onPause()
     }
 
     interface RateListView{
-        fun setCurrencyRateList(baseResult: BaseResult)
+
+        fun setResult(baseCurrency : String, currencies : Map<String,BigDecimal>)
 
         fun onError(message : String)
 

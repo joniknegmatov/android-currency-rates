@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.TextView
 import io.jonibek.currency.R
 import io.jonibek.currency.data.local.CurrencyContainer
-import io.jonibek.currency.data.remote.json.BaseResult
 import io.jonibek.currency.util.CurrencyHelper
 import java.text.DecimalFormat
 import android.support.v7.widget.SimpleItemAnimator
@@ -22,7 +21,6 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
 
     private lateinit var currentCurrency: String
     private var currencyContainer: CurrencyContainer? = null
-    private var amount: BigDecimal = BigDecimal.ONE
     private var hasConnection: Boolean = true
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -34,17 +32,17 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
         hasConnection = false
     }
 
-    fun setData(baseResult: BaseResult) {
+    fun setData(base : String, values : Map<String,BigDecimal>){
         hasConnection = true
         if (currencyContainer == null) {
-            currencyContainer = CurrencyContainer(baseResult.base, baseResult.rates)
-            currentCurrency = baseResult.base
+            currencyContainer = CurrencyContainer(base, values)
+            currentCurrency = base
             notifyDataSetChanged()
         } else if(toChangeValues != null){
             changeCurrency(toChangeValues!!.first, toChangeValues!!.second)
             toChangeValues = null
         } else {
-            currencyContainer!!.updateValues(baseResult.rates)
+            currencyContainer!!.updateValues(values)
             notifyAllItemsChangedExpectFirst()
         }
     }
@@ -66,16 +64,14 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     override fun onBindViewHolder(viewHolder: CurrencyViewHolder, position: Int) {
         if (position == 0) {
             viewHolder.itemAmount.removeTextChangedListener(this)
-            viewHolder.itemAmount.setText(DecimalFormat("#.##").format(amount))
             viewHolder.itemCode.text = currentCurrency
             viewHolder.itemAmount.addTextChangedListener(this)
         } else {
             viewHolder.itemAmount.removeTextChangedListener(this)
             val pair = currencyContainer!!.getCurrencyNameAndRate(position)
             val currencyName = pair.first
-            val rate = pair.second!! * amount
             viewHolder.itemCode.text = currencyName
-            viewHolder.itemAmount.setText(DecimalFormat("#.##").format(rate))
+            viewHolder.itemAmount.setText(DecimalFormat("#.##").format(pair.second))
         }
 
         val currencyInfo = CurrencyHelper.getCurrencyInfo(if (position == 0) currentCurrency else currencyContainer!!.getCurrencyNameAndRate(position).first)
@@ -91,19 +87,16 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     }
 
 
-    var toChangeValues: Pair<CharSequence, CharSequence>? = null
+    private var toChangeValues: Pair<CharSequence, CharSequence>? = null
     override fun changeCurrency(currencyCode: CharSequence, currencyAmount: CharSequence) {
         if (hasConnection) {
             if (currencyCode != currentCurrency) {
-                val newAmount = if (currencyAmount.isEmpty()) BigDecimal.ONE else currencyAmount.toString().toBigDecimal()
-                currencyContainer!!.changeBaseRate(currentCurrency, amount/newAmount)
-                amount = newAmount
                 currentCurrency = currencyCode.toString()
                 val index = currencyContainer!!.moveCurrencyToTop(currencyCode.toString())
                 notifyItemMoved(index, 0)
                 notifyItemChanged(index)
                 notifyItemChanged(0)
-                currencyChangeCallback.onCurrencyChange(currentCurrency)
+                currencyChangeCallback.onCurrencyChange(currentCurrency, currencyAmount.toString())
             }
         } else
             toChangeValues = currencyCode to currencyAmount
@@ -116,8 +109,7 @@ class CurrencyRateAdapter(private var currencyChangeCallback: CurrencyChangeCall
     }
 
     override fun onTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        amount = if (text!!.isEmpty()) BigDecimal.ZERO else text.toString().toBigDecimal()
-        notifyAllItemsChangedExpectFirst()
+        currencyChangeCallback.onAmountChange(text.toString())
     }
 
     inner class CurrencyViewHolder(itemView: View, private var currencyCallback: CurrencyCallback) :
@@ -146,5 +138,6 @@ interface CurrencyCallback {
 }
 
 interface CurrencyChangeCallback {
-    fun onCurrencyChange(currencyCode: String)
+    fun onCurrencyChange(currencyCode: String, amount : String)
+    fun onAmountChange(amount : String)
 }
